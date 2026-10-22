@@ -1,0 +1,13 @@
+# Simulink build and cache files (regenerated on every run)
+slprj/
+*.slxc
+*.autosave
+*.asv
+*.mexw64
+*.slx.r20*
+sccprj/
+codegen/
+
+# OS files
+Thumbs.db
+desktop.ini
