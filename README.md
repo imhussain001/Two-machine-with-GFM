@@ -21,8 +21,11 @@ The test system, operating point and parameters follow Rodríguez-Amenedo & Arna
 - **Model type:** phasor (RMS) model on a 100 MVA base at 50 Hz. The network is solved
   algebraically at every time step.
 - **Network:** every source (SG1, SG2, GFM) is connected as a Norton injection behind its
-  reactance. Loads are constant impedance in the 0.0 folder and ZI (as in the paper) in
-  the 1.0 folder; see the table below.
+  reactance. Loads are ZI loads, as in the paper: constant current for P and constant
+  impedance for Q.
+- **Damping:** rotor damping D = 0, as in the paper. Load damping D_load = 1 is lumped
+  into the swing equations (Kundur 1994, Sec. 11.1.3), giving D1 = 0.833 and D2 = 1.0
+  on machine base. See [Assumptions and limitations](#assumptions-and-limitations).
 - **Initial state:** a Newton load flow inside each model sets it, using SG1 = 1350 MW and
   GFM = 0 MW, with SG2 as the slack. Each model starts in steady state, with
   max |dx/dt(0)| ≤ 5e-12.
@@ -73,8 +76,6 @@ Other files:
 | AGC integral gain `Ki` | 0.02 (low gain, AGC ≈ 6–7× slower than primary control) | 0.1 |
 | GFM control (`pod_on`) | 0: P-f droop only | 1: droop + POD-P |
 | Simulation time `t_stop` | 150 s | 100 s |
-| SG damping | D = 0 | rotor D = 0 (paper) + load damping D_load = 1 → D1 = 0.833, D2 = 1.0 (own base) |
-| Loads | constant impedance | ZI, as in the paper: P constant current, Q constant impedance |
 
 ## How to run
 
@@ -101,27 +102,29 @@ it there and click **Reinitialize from Source**.
 
 | | Case 1 (no AGC) | Case 2 (AGC) | Case 3 (AGC + GFM) | Case 4 (GFM, no AGC) |
 |---|---|---|---|---|
-| SG1 peak frequency deviation | 112.0 mHz | 111.3 mHz | 78.2 mHz | 78.6 mHz |
-| Final frequency | 50.037 Hz | 50.001 Hz | 50.001 Hz | 50.031 Hz |
-| Final tie-line change | 76.7 MW | 0.8 MW | 1.0 MW | 63.0 MW |
-| Peak GFM active power | — | — | 54.7 MW | 54.7 MW |
+| SG1 peak frequency deviation | 110.6 mHz | 110.0 mHz | 77.0 mHz | 77.3 mHz |
+| Final frequency | 50.039 Hz | 50.002 Hz | 50.002 Hz | 50.031 Hz |
+| Final tie-line change | 74.9 MW | 1.6 MW | 1.4 MW | 61.1 MW |
+| Peak GFM active power | — | — | 55.8 MW | 55.8 MW |
 
 What the cases show:
 
 - **The GFM** cuts the peak frequency deviation by about 30 % and the peak tie-line
   swing by about 20 %.
 - **The AGC** brings the frequency back to 50 Hz and the tie-line flow back to its
-  scheduled value. At Ki = 0.02 this takes about 125 s.
+  scheduled value. Ki = 0.02 makes it slow: after 150 s the tie-line is still 1.4–1.6 MW
+  off schedule.
+- **Damping:** the 0.60 Hz inter-area mode has ζ = 2.2 % in Case 1, so all cases settle.
 
 ## Assumptions and limitations
 
 - **Phasor (RMS) model:** a balanced, positive-sequence, fundamental-frequency model. It
   does not represent EMT effects or the GFM's inner current and voltage loops.
 - **Loads:** unity power factor, and the load models themselves have no frequency
-  dependence. In the 1.0 folder the load damping is lumped into the swing equations
-  instead (see SG model 1.0 below), and the constant-current loads follow the bus-voltage angle through a 0.1 ms lag. That lag is
-  numerical only: it avoids an algebraic loop that is too slow to solve, and it shifts the
-  inter-area eigenvalue by about 2e-4 1/s.
+  dependence; the load damping is lumped into the swing equations instead (see below).
+  The constant-current loads follow the bus-voltage angle through a 0.1 ms lag. That lag
+  is numerical only: it avoids an algebraic loop that is too slow to solve, and it shifts
+  the inter-area eigenvalue by about 2e-4 1/s.
 - **GFM:** an ideal voltage source with fixed |Eg|. There is no current limit and no
   DC-side dynamics.
 - **SG model 0.0:** has no damper or excitation dynamics.
@@ -131,13 +134,14 @@ What the cases show:
   - **Without load damping**, the 0.60 Hz inter-area mode in Case 1 (primary control
     only) is unstable after the load step (ζ ≈ −0.4 %). The cause is the fast, high-gain
     ST1 exciter with no PSS: with the AVR removed, ζ ≈ 5.7 %.
-  - **The models therefore add load damping** D_load = 1 (% load change per %
-    frequency change). This is the low end of the typical 1–2 range in Kundur, *Power
-    System Stability and Control* (1994), Sec. 11.1.3. It is lumped into each machine's
-    swing equation as in the standard load-frequency-control model 1/(2Hs + D), giving
-    D1 = D_load·P_L2/S1 = 0.833 and D2 = D_load·P_L3/S2 = 1.0 on machine base.
-  - **Result:** ζ = 1.0 % in Case 1, close to the weak damping in the paper's Fig. 16
-    (ζ ≈ 0.5–1 %).
+  - **The models therefore add load damping**, in both folders: D_load = 1 (% load
+    change per % frequency change). This is the low end of the typical 1–2 range in
+    Kundur, *Power System Stability and Control* (1994), Sec. 11.1.3. It is lumped into
+    each machine's swing equation as in the standard load-frequency-control model
+    1/(2Hs + D), giving D1 = D_load·P_L2/S1 = 0.833 and D2 = D_load·P_L3/S2 = 1.0 on
+    machine base.
+  - **Result:** ζ = 1.0 % in Case 1 of the 1.0 folder, close to the weak damping in the
+    paper's Fig. 16 (ζ ≈ 0.5–1 %). In the 0.0 folder (no exciter), ζ = 2.2 %.
   - **This is an added assumption.** The paper's loads have no frequency dependence.
 
 ## References
