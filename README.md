@@ -20,11 +20,12 @@ The test system, operating point and parameters follow Rodríguez-Amenedo & Arna
 
 - **Model type:** phasor (RMS) model on a 100 MVA base at 50 Hz. The network is solved
   algebraically at every time step.
-- **Network:** constant-impedance loads. Every source (SG1, SG2, GFM) is connected as a
-  Norton injection behind its reactance.
+- **Network:** every source (SG1, SG2, GFM) is connected as a Norton injection behind its
+  reactance. Loads are constant impedance in the 0.0 folder and ZI (as in the paper) in
+  the 1.0 folder; see the table below.
 - **Initial state:** a Newton load flow inside each model sets it, using SG1 = 1350 MW and
   GFM = 0 MW, with SG2 as the slack. Each model starts in steady state, with
-  max |dx/dt(0)| ≈ 1e-15.
+  max |dx/dt(0)| ≤ 5e-12.
 - **Disturbance:** a −100 MW load step (load rejection) at bus 2 at t = 1 s.
 - **Primary control:** IEEEG1 governor with 5 % droop (K = 20) and a reheat steam turbine
   (T4 = 0.3 s, T5 = 7 s, T6 = 0.6 s).
@@ -42,7 +43,7 @@ each model folder.
 | Folder | Synchronous generator model |
 |---|---|
 | `Two machine with GFM_0_0_model/` | Model 0.0, classical: constant E′ behind x′d = 0.34 pu, H = 6.3 s, D = 0, no exciter |
-| `Two machine with GFM_1_0_model/` | Model 1.0: field winding (x′d, T′d0 = 6.47 s), IEEE ST1 exciter (KA = 200), H = 6.3 s, D = 2 |
+| `Two machine with GFM_1_0_model/` | Model 1.0: field winding (x′d, T′d0 = 6.47 s), IEEE ST1 exciter (KA = 200), H = 6.3 s, D = 0 (paper value) |
 
 Both folders have the same four study folders. Each study folder holds its own copies of
 the case models and runs on its own, without needing any other folder:
@@ -63,7 +64,7 @@ Case models:
 Other files:
 
 - Reference PDFs and notes are in the model folders.
-- The `backup_2026-10-21_*` folders hold earlier versions of the models.
+- The `backup_*` folders hold earlier versions of the models.
 
 ## Settings that differ between the two folders
 
@@ -72,6 +73,8 @@ Other files:
 | AGC integral gain `Ki` | 0.02 (low gain, AGC ≈ 6–7× slower than primary control) | 0.1 |
 | GFM control (`pod_on`) | 0: P-f droop only | 1: droop + POD-P |
 | Simulation time `t_stop` | 150 s | 100 s |
+| SG damping | D = 0 | rotor D = 0 (paper) + load damping D_load = 1 → D1 = 0.833, D2 = 1.0 (own base) |
+| Loads | constant impedance | ZI, as in the paper: P constant current, Q constant impedance |
 
 ## How to run
 
@@ -114,11 +117,28 @@ What the cases show:
 
 - **Phasor (RMS) model:** a balanced, positive-sequence, fundamental-frequency model. It
   does not represent EMT effects or the GFM's inner current and voltage loops.
-- **Loads:** constant impedance at unity power factor.
+- **Loads:** unity power factor, and the load models themselves have no frequency
+  dependence. In the 1.0 folder the load damping is lumped into the swing equations
+  instead (see SG model 1.0 below), and the constant-current loads follow the bus-voltage angle through a 0.1 ms lag. That lag is
+  numerical only: it avoids an algebraic loop that is too slow to solve, and it shifts the
+  inter-area eigenvalue by about 2e-4 1/s.
 - **GFM:** an ideal voltage source with fixed |Eg|. There is no current limit and no
   DC-side dynamics.
-- **SG model 0.0:** has no damper or excitation dynamics. Model 1.0 represents the
-  missing dampers with D = 2.
+- **SG model 0.0:** has no damper or excitation dynamics.
+- **SG model 1.0:** rotor damping is D = 0, as in the paper (Table 5). Model 1.0 leaves
+  out the damper windings, but in this system they add almost no damping to the
+  inter-area mode (equivalent D ≈ 0.03 pu).
+  - **Without load damping**, the 0.60 Hz inter-area mode in Case 1 (primary control
+    only) is unstable after the load step (ζ ≈ −0.4 %). The cause is the fast, high-gain
+    ST1 exciter with no PSS: with the AVR removed, ζ ≈ 5.7 %.
+  - **The models therefore add load damping** D_load = 1 (% load change per %
+    frequency change). This is the low end of the typical 1–2 range in Kundur, *Power
+    System Stability and Control* (1994), Sec. 11.1.3. It is lumped into each machine's
+    swing equation as in the standard load-frequency-control model 1/(2Hs + D), giving
+    D1 = D_load·P_L2/S1 = 0.833 and D2 = D_load·P_L3/S2 = 1.0 on machine base.
+  - **Result:** ζ = 1.0 % in Case 1, close to the weak damping in the paper's Fig. 16
+    (ζ ≈ 0.5–1 %).
+  - **This is an added assumption.** The paper's loads have no frequency dependence.
 
 ## References
 

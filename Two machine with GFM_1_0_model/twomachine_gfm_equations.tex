@@ -255,19 +255,19 @@ P_{g,\text{ref}} = \frac{\re S_5^0}{k_{Sg}},\qquad
 P_{\text{tie}}^0 = \re\!\left\{V_2^0\,\cj{\left(\frac{V_2^0-V_3^0}{jx_L}\right)}\right\}.
 \end{equation}
 
-\subsection{Constant-impedance loads}
-A load consuming $S_L$ at voltage $V$ represented by a shunt admittance $y_L$:
+\subsection{ZI loads}
+As in the paper \cite{RA2021access}, the loads are ZI loads: the active power is a constant current, the reactive power a constant impedance.
+\paragraph{Active power: constant current.} The load current has a fixed magnitude and is in phase with the bus voltage:
 \begin{equation}
-S_L = V\,\cj{(y_L V)} = \cj{y_L}\,|V|^2
-\;\;\Longrightarrow\;\;
-y_L = \frac{\cj{S_L}}{|V|^2}.
+I_{L,i} = I_{L,i}^{\text{mag}}\,\frac{V_i}{|V_i|},\qquad
+I_{L,i}^{\text{mag}} = \frac{P_{L,i}^0}{|V_i^0|} = \frac{\re(-S_i^0)}{|V_i^0|},\qquad
+P_{Li}(t) = \re\{V_i\cj{I_{L,i}}\} = I_{L,i}^{\text{mag}}\,|V_i(t)| .
 \end{equation}
-Since the injection at a load bus is $S_i^0 = -S_{L,i}$:
+\paragraph{Reactive power: constant impedance.} A shunt susceptance
 \begin{equation}
-y_{L2} = \frac{\cj{(-S_2^0)}}{|V_2^0|^2},\qquad
-y_{L3} = \frac{\cj{(-S_3^0)}}{|V_3^0|^2}.
+y_{Q,i} = j\,\im\!\left\{\frac{\cj{(-S_i^0)}}{|V_i^0|^2}\right\},\qquad Q_{Li}(t) = -\im\{y_{Q,i}\}\,|V_i(t)|^2,
 \end{equation}
-Consequence: the actual load power is voltage dependent, $P_{Li}(t) = G_{Li}\,|V_i(t)|^2$.
+which is zero here (unity power factor, Table 2).
 
 \subsection{Norton equivalent of the sources (SGs and GFM)}
 Every source is a voltage behind a reactance: SG$i$ is $\bar E_{Qi}$ behind $jx_{qi}$ at bus $k_i$ ($k_1=1$, $k_2=4$), the GFM is $E_g$ behind $jx_g$ at bus 5. For a source $E$ behind $jx$ connected to bus $k$:
@@ -281,39 +281,33 @@ J_1 = \frac{\bar E_{Q1}}{jx_{q1}},\qquad J_2 = \frac{\bar E_{Q2}}{jx_{q2}},\qqua
 
 \subsection{Augmented admittance matrix and impedance matrix}
 \begin{align}
-\bm Y_{\text{aug}} &= \bm Y_{\text{bus}} + \operatorname{diag}(0,\,y_{L2},\,y_{L3},\,0,\,0),\\
+\bm Y_{\text{aug}} &= \bm Y_{\text{bus}} + \operatorname{diag}(0,\,y_{Q2},\,y_{Q3},\,0,\,0),\\
 Y_{\text{aug},11} &\mathrel{+}= \frac{1}{jx_{q1}},\qquad Y_{\text{aug},44} \mathrel{+}= \frac{1}{jx_{q2}},\qquad Y_{\text{aug},55} \mathrel{+}= \frac{\gamma_g}{jx_g} .
 \end{align}
-Nodal equation with current-source injections only at buses 1, 4, 5:
+Nodal equation with the source (Norton) currents injected at buses 1, 4, 5 and the load currents drawn at buses 2, 3:
 \begin{equation}
-\bm Y_{\text{aug}}\bm V = \bm e_1 J_1 + \bm e_4 J_2 + \bm e_5 J_g
-\;\;\Longrightarrow\;\;
-\bm V = \bm Z\,(\bm e_1 J_1 + \bm e_4 J_2 + \bm e_5 J_g),\qquad \bm Z = \bm Y_{\text{aug}}^{-1}.
+\bm Y_{\text{aug}}\bm V = \bm e_1 J_1 + \bm e_4 J_2 + \bm e_5 J_g - \bm e_2 I_{L,2} - \bm e_3 I_{L,3},\qquad \bm Z = \bm Y_{\text{aug}}^{-1}.
 \end{equation}
 Keeping only the columns of the injected buses:
 \begin{equation}
-\boxed{\bm V = \bm Z_n \begin{bmatrix} J_1\\ J_2\\ J_g\end{bmatrix},\qquad
-\bm Z_n = \bm Z_{:,[1,4,5]}\in\mathbb C^{5\times 3}\quad(\text{Case 3}).}
+\boxed{\bm V = \bm Z_n \begin{bmatrix} J_1\\ J_2\\ J_g\end{bmatrix} - \bm Z_{nL}\begin{bmatrix} I_{L,2}\\ I_{L,3}\end{bmatrix},\qquad
+\bm Z_n = \bm Z_{:,[1,4,5]}\in\mathbb C^{5\times 3},\quad \bm Z_{nL} = \bm Z_{:,[2,3]}\quad(\text{Case 3}).}
 \end{equation}
-In Cases 1 and 2 (4-bus network, no GFM): $\bm Y_{\text{aug}} = \bm Y_{\text{bus}} + \operatorname{diag}(0,y_{L2},y_{L3},0)$ with the two SG shunts, $\bm Z_n = \bm Z_{:,[1,4]}\in\mathbb C^{4\times 2}$ and $\bm V = \bm Z_n[J_1;\,J_2]$.
+In Cases 1 and 2 (4-bus network, no GFM): $\bm Y_{\text{aug}} = \bm Y_{\text{bus}} + \operatorname{diag}(0,y_{Q2},y_{Q3},0)$ with the two SG shunts, $\bm Z_n = \bm Z_{:,[1,4]}\in\mathbb C^{4\times 2}$, $\bm Z_{nL} = \bm Z_{:,[2,3]}$ and $\bm V = \bm Z_n[J_1;\,J_2] - \bm Z_{nL}\bm I_L$.
 
-\subsection{Load step as a change of the impedance matrix}
-A step $\Delta P_{L2}$ (\texttt{dP\_L2\_MW}) at bus 2 is a conductance change at nominal voltage:
+\subsection{Load step as a change of the load current}
+A step $\Delta P_{L2}$ (\texttt{dP\_L2\_MW}) at bus 2 changes the constant-current magnitude by the step size at nominal voltage:
 \begin{equation}
-\Delta G_{L2} = \frac{\Delta P_{L2}/S_{\text{base}}}{|V_2^0|^2},
-\qquad
-Y_{\text{aug},22}^{\text{post}} = Y_{\text{aug},22}^{\text{pre}} + \Delta G_{L2},
+\bm I_L^{\text{mag,pre}} = \begin{bmatrix} I_{L,2}^{\text{mag}}\\ I_{L,3}^{\text{mag}}\end{bmatrix},\qquad
+\bm I_L^{\text{mag,post}} = \bm I_L^{\text{mag,pre}} + \begin{bmatrix} \dfrac{\Delta P_{L2}/S_{\text{base}}}{|V_2^0|}\\ 0\end{bmatrix}
 \end{equation}
-\begin{equation}
-\bm Z^{\text{post}} = \big(\bm Y_{\text{aug}}^{\text{post}}\big)^{-1},\qquad
-\bm Z_n^{\text{post}} = \bm Z^{\text{post}}_{:,[1,4,5]}.
-\end{equation}
-With $\Delta P_{L2}=-100$ MW this is a load rejection in Area 1.
+(\texttt{IL\_pre}, \texttt{IL\_post}). $\bm Z_n$ and $\bm Z_{nL}$ do not change. With $\Delta P_{L2}=-100$ MW this is a load rejection in Area 1.
 
 \subsection{Consistency check at $t=0$}
 The model checks
 \begin{equation}
-\bm Z_n^{\text{pre}}\begin{bmatrix} \bar E_{Q1}/(jx_{q1})\\ \bar E_{Q2}/(jx_{q2})\\ E_g/(jx_g)\end{bmatrix} = \bm V^0 .
+\bm Z_n\begin{bmatrix} \bar E_{Q1}/(jx_{q1})\\ \bar E_{Q2}/(jx_{q2})\\ E_g/(jx_g)\end{bmatrix}
+- \bm Z_{nL}\begin{bmatrix} I_{L,2}^{\text{mag}}\,V_2^0/|V_2^0|\\ I_{L,3}^{\text{mag}}\,V_3^0/|V_3^0|\end{bmatrix} = \bm V^0 .
 \end{equation}
 At the operating point $P_{GFM}=Q_{GFM}=0$, so from the GFM initialisation $E_g = V_5^0$. The Norton source current and the current drawn by the shunt $1/(jx_g)$ then cancel,
 \begin{equation}
@@ -336,10 +330,10 @@ E_g = |E_g|\,e^{j\delta_g}.
 \end{equation}
 
 \subsection{Network solution (\blk{Network solution})}\label{sec:network-solution}
-\paragraph{Step 1: impedance selection by the load step.}
-The step signal $u_{\text{step}}(t) = 0$ for $t<t_{\text{step}}$, $1$ for $t\ge t_{\text{step}}$ drives a switch (\blk{Select Zn}, threshold 0.5):
+\paragraph{Step 1: load-current magnitudes selected by the load step.}
+The step signal $u_{\text{step}}(t) = 0$ for $t<t_{\text{step}}$, $1$ for $t\ge t_{\text{step}}$ drives a switch (\blk{Select load current magnitude}, threshold 0.5):
 \begin{equation}
-\bm Z_n(t) = \begin{cases}\bm Z_n^{\text{pre}}, & u_{\text{step}}<0.5\\ \bm Z_n^{\text{post}}, & u_{\text{step}}\ge 0.5\end{cases}.
+\bm I_L^{\text{mag}}(t) = \begin{cases}\bm I_L^{\text{mag,pre}}, & u_{\text{step}}<0.5\\ \bm I_L^{\text{mag,post}}, & u_{\text{step}}\ge 0.5\end{cases}.
 \end{equation}
 
 \paragraph{Step 2: Norton currents of the sources.}
@@ -348,20 +342,32 @@ The step signal $u_{\text{step}}(t) = 0$ for $t<t_{\text{step}}$, $1$ for $t\ge 
 J_1 = \frac{E_1}{jx_{q1}},\qquad J_2 = \frac{E_2}{jx_{q2}},\qquad J_g = \frac{E_g}{jx_g}.
 \end{equation}
 
-\paragraph{Step 3: all bus voltages.}
+\paragraph{Step 3: load currents.}
+The load currents have the magnitude of Step 1 and the angle $\theta_L$ of the load-bus voltages. That angle is measured relative to the SG1 rotor, as for $\theta_5$ in \blk{Bus quantities} below, so that it stays continuous when the frequency drifts:
 \begin{equation}
-\boxed{\bm V = \bm Z_n\begin{bmatrix}J_1\\ J_2\\ J_g\end{bmatrix}
-= \bm Z_{:,1}\frac{E_1}{jx_{q1}} + \bm Z_{:,4}\frac{E_2}{jx_{q2}} + \bm Z_{:,5}\frac{E_g}{jx_g} .}
+\theta_{V,i} = \delta_1 + \arg\!\big(V_i\,e^{-j\delta_1}\big),\qquad i = 2,3 .
+\end{equation}
+Taking $\theta_L = \theta_V$ directly would close an algebraic loop through the load buses that has no real-valued signal in it except the angle; Simulink can solve it, but far too slowly. The angle therefore reaches the load currents through a fast lag (state $\theta_L$, \blk{Load current angle theta\_L}):
+\begin{equation}
+\boxed{T_L\frac{\dd\theta_{L,i}}{\dd t} = \theta_{V,i} - \theta_{L,i},\qquad \theta_{L,i}(0) = \theta_{V,i}^0,\qquad
+I_{L,i} = I_{L,i}^{\text{mag}}\,e^{j\theta_{L,i}},}
+\end{equation}
+with $T_L = 0.1$~ms (\texttt{T\_L}). This is numerical only: the linearised model differs from the exact algebraic solution by $\Delta\sigma \approx 2\times10^{-4}$~s$^{-1}$ on the inter-area mode (Case~1: $-0.00162$ vs.\ $-0.00182$~s$^{-1}$, both at $\pm j3.775$~s$^{-1}$).
+
+\paragraph{Step 4: all bus voltages.}
+\begin{equation}
+\boxed{\bm V = \bm Z_n\begin{bmatrix}J_1\\ J_2\\ J_g\end{bmatrix} - \bm Z_{nL}\begin{bmatrix}I_{L,2}\\ I_{L,3}\end{bmatrix}
+= \bm Z_{:,1}\frac{E_1}{jx_{q1}} + \bm Z_{:,4}\frac{E_2}{jx_{q2}} + \bm Z_{:,5}\frac{E_g}{jx_g} - \bm Z_{:,2}I_{L,2} - \bm Z_{:,3}I_{L,3}.}
 \end{equation}
 
-\paragraph{Step 4: GFM output current.}
+\paragraph{Step 5: GFM output current.}
 The current that the GFM delivers to bus 5 is the Norton source current minus the current through its own shunt (blocks \blk{V bus 5}, \blk{Eg - V5}, \blk{GFM current 1 over jxg}):
 \begin{equation}
 \boxed{I_g = J_g - \frac{V_5}{jx_g} = \frac{E_g - V_5}{jx_g}.}
 \end{equation}
 
 \paragraph{Equivalence with the Thevenin form.}
-Let $\bm Y_0 = \bm Y_{\text{aug}} - \tfrac{1}{jx_g}\bm e_5\bm e_5^{\mathsf T}$ be the network without the GFM, $\bm Z^{(0)} = \bm Y_0^{-1}$. Substituting $J_g = I_g + V_5/(jx_g)$ in the nodal equation gives $\bm Y_0\bm V = \bm e_1J_1+\bm e_4J_2+\bm e_5I_g$, hence $V_5 = V_{th} + Z_{th}I_g$ with $V_{th} = Z^{(0)}_{51}J_1 + Z^{(0)}_{54}J_2$, $Z_{th} = Z^{(0)}_{55}$, and with $I_g = (E_g - V_5)/(jx_g)$:
+Let $\bm Y_0 = \bm Y_{\text{aug}} - \tfrac{1}{jx_g}\bm e_5\bm e_5^{\mathsf T}$ be the network without the GFM, $\bm Z^{(0)} = \bm Y_0^{-1}$. Substituting $J_g = I_g + V_5/(jx_g)$ in the nodal equation gives $\bm Y_0\bm V = \bm e_1J_1+\bm e_4J_2+\bm e_5I_g$, hence $V_5 = V_{th} + Z_{th}I_g$ with $V_{th} = Z^{(0)}_{51}J_1 + Z^{(0)}_{54}J_2 - Z^{(0)}_{52}I_{L,2} - Z^{(0)}_{53}I_{L,3}$ (load-current terms added to the right-hand side as above), $Z_{th} = Z^{(0)}_{55}$, and with $I_g = (E_g - V_5)/(jx_g)$:
 \begin{equation}
 I_g = \frac{E_g - V_{th}}{jx_g + Z_{th}} .
 \end{equation}
@@ -446,7 +452,7 @@ With $Y_{\text{red},ik} = G_{ik}+jB_{ik}$ and $\delta_{ik}=\delta_i-\delta_k$:
 \boxed{P_{i}(\bm\delta,\bm E_Q) = \re\{E_i\cj{I_i}\} = \sum_{k\in\{1,2,g\}} |E_i||E_k|\big(G_{ik}\cos\delta_{ik} + B_{ik}\sin\delta_{ik}\big)}
 \label{eq:Pred}
 \end{equation}
-with $|E_1| = E_{Q1}(t)$, $|E_2| = E_{Q2}(t)$, $|E_g|$ constant. This is the nonlinear coupling of the angle states and of the field states (through $E_{Qi}$) through the network; $G_{ik}\neq 0$ because the constant-impedance loads are absorbed in $\bm Y_{\text{red}}$. The matrices change at $t_{\text{step}}$ ($\bm Y_{\text{red}}^{\text{pre}}\to\bm Y_{\text{red}}^{\text{post}}$).
+with $|E_1| = E_{Q1}(t)$, $|E_2| = E_{Q2}(t)$, $|E_g|$ constant. This is the nonlinear coupling of the angle states and of the field states (through $E_{Qi}$) through the network. With the ZI loads, $\bm Y_{\text{red}}$ contains only the constant-impedance (reactive) part of the loads; the constant-current part adds, at each source, the current $-\bm Y_d\tilde{\bm Z}_{[1,4,5],[2,3]}\bm I_L$, which depends on the load-bus voltage angles. \eqref{eq:Pred} is therefore exact only for constant-impedance loads (as in the 0.0 model); the small-signal analysis of Section~\ref{sec:ss}\,ff.\ uses it as an approximation.
 
 %======================================================================
 \section{Synchronous generator blocks \blk{SG1} and \blk{SG2}}
@@ -529,10 +535,17 @@ J = \frac{2HS_i}{\omega_{sm}^2}.
 \;\;\Longrightarrow\;\;
 2H\frac{\dd\omega}{\dd t} = T_m^{\text{pu}} - T_e^{\text{pu}} - T_D^{\text{pu}} .
 \end{equation}
-\paragraph{Power to torque.} $P = T\omega_m \Rightarrow T^{\text{pu}} = P^{\text{pu}}/\omega$. Damping $T_D^{\text{pu}} = D(\omega-1)$.
+\paragraph{Power to torque.} $P = T\omega_m \Rightarrow T^{\text{pu}} = P^{\text{pu}}/\omega$. Damping $T_D^{\text{pu}} = D_i(\omega_i-1)$, with
+\begin{equation}
+D_i = D + D_{\text{load}}\,\frac{P_{L,\text{area }i}}{S_i},\qquad
+D_1 = D + D_{\text{load}}\frac{P_{L2}}{S_1} = 0.833,\qquad
+D_2 = D + D_{\text{load}}\frac{P_{L3}}{S_2} = 1.0 ,
+\label{eq:Di}
+\end{equation}
+where $D = 0$ is the rotor damping (paper value) and $D_{\text{load}} = 1$ the load damping on the load base. Typical values of $D_{\text{load}}$ are 1 to 2 (\% load change per \% frequency change) \cite[Sec.~11.1.3]{Kundur1994}; the lower end is used. The paper's loads have no frequency dependence, so this is an added assumption; as in the standard load-frequency control model, $1/(2Hs + D)$ \cite[Ch.~11]{Kundur1994}, the load damping of each area is lumped into the swing equation of its machine (it acts on rotor speed rather than on the load-bus frequency).
 Electrical power converted to own base, $P_{ei}/k_{Si}$:
 \begin{equation}
-\boxed{\frac{\dd\omega_i}{\dd t} = \frac{1}{2H}\left[\frac{P_{mi} - P_{ei}/k_{Si}}{\omega_i} - D(\omega_i - 1)\right],\qquad \omega_i(0)=1.}
+\boxed{\frac{\dd\omega_i}{\dd t} = \frac{1}{2H}\left[\frac{P_{mi} - P_{ei}/k_{Si}}{\omega_i} - D_i(\omega_i - 1)\right],\qquad \omega_i(0)=1.}
 \label{eq:swing}
 \end{equation}
 (Blocks: \blk{to own base} $\to$ \blk{Accelerating power} $\to$ \blk{Torque} ($\div\omega$) $\to$ \blk{Minus damping} $\to$ \blk{1 over 2H} $\to$ \blk{Speed}.)
@@ -548,9 +561,9 @@ Electrical power converted to own base, $P_{ei}/k_{Si}$:
 \begin{equation}
 \frac{2H}{\omega_s}\,\ddot\delta_i
 = \frac{P_{mi} - \tfrac{1}{k_{Si}}P_i(\delta_1,\delta_2,\delta_g,E_{Q1},E_{Q2})}{1+\dot\delta_i/\omega_s}
-- \frac{D}{\omega_s}\dot\delta_i .
+- \frac{D_i}{\omega_s}\dot\delta_i .
 \end{equation}
-Here $D=2$ represents the damper windings that model 1.0 omits.
+The rotor damping is $D=0$, the paper's value \cite[Table~5]{RA2021access}. The damper windings that model 1.0 omits add almost no damping to the inter-area mode: adding the GENROU damper circuits ($T''_{d0}$, $T''_{q0}$) to the two-axis model changes its damping ratio by $+0.04$ percentage points, equivalent to $D\approx0.03$. Without load damping ($D_i = 0$) the inter-area mode of Case~1 (0.60~Hz) is marginal at the initial operating point ($\zeta = 0.04\,\%$) and slightly unstable after the load step, where the tie line carries more power ($\zeta \approx -0.4\,\%$). The fast, high-gain ST1 exciter without a PSS is the cause (with $K_A\to 0$, $\zeta \approx 5.7\,\%$). With the load damping \eqref{eq:Di} the mode is $\lambda = -0.0376 \pm j3.775$~s$^{-1}$ ($\zeta = 1.0\,\%$), close to the weak damping of the paper's Fig.~16 ($\zeta \approx 0.5$--$1\,\%$).
 
 \subsection{Speed governor (\blk{Governor (IEEEG1)})}
 IEEEG1 governor \cite{IEEE1973,PESTR1}; parameters from \cite[Table~7]{RA2021access}; see also \cite[Ch.~9]{Kundur1994}.
@@ -722,15 +735,15 @@ Area 1 = SG1 (+ GFM), Area 2 = SG2.
 For the lossless tie, the export of Area 2 is $\Delta P_{\text{tie},2} = -\Delta P_{\text{tie}}$.
 
 \subsection{Frequency bias = area frequency response characteristic}
-Static response of each area to a frequency change $\Delta f$ (on 100 MVA): from the governor droop, $\Delta P_{mi}^{(100)} = -k_{Si}K\Delta f$; from \eqref{eq:gfm-ss}, $\Delta P_g^{(100)} = -\frac{k_{Sg}}{R_g}\Delta f$. The loads are static (no load damping). The bias set in the AGC block uses the governor and GFM droops:
+Static response of each area to a frequency change $\Delta f$ (on 100 MVA): from the governor droop, $\Delta P_{mi}^{(100)} = -k_{Si}K\Delta f$; from \eqref{eq:gfm-ss}, $\Delta P_g^{(100)} = -\frac{k_{Sg}}{R_g}\Delta f$. The load damping is not in the load model but in the swing equations ($D_i$, \eqref{eq:Di}). The bias set in the AGC block uses the governor and GFM droops only:
 \begin{equation}
 \boxed{B_1 = K\,k_{S1} + \gamma_g\frac{k_{Sg}}{R_g},\qquad B_2 = K\,k_{S2}\qquad[\text{pu}_{100}/\text{pu}_f].}
 \end{equation}
-The rotor damping $D$ adds a further static response: from \eqref{eq:swing} at $\dot\omega_i=0$, $P_{ei}/k_{Si} = P_{mi} - D\,\omega_i\Delta\omega_i \approx P_{mi} - D\Delta\omega_i$, i.e.\ $\Delta P_{ei}^{(100)} \approx \Delta P_{mi}^{(100)} - k_{Si}D\Delta f$. The true area frequency response characteristic is therefore
+The damping $D_i$ (rotor damping plus load damping, \eqref{eq:Di}) adds a further static response: from \eqref{eq:swing} at $\dot\omega_i=0$, $P_{ei}/k_{Si} = P_{mi} - D_i\,\omega_i\Delta\omega_i \approx P_{mi} - D_i\Delta\omega_i$, i.e.\ $\Delta P_{ei}^{(100)} \approx \Delta P_{mi}^{(100)} - k_{Si}D_i\Delta f$. The true area frequency response characteristic is therefore
 \begin{equation}
-\beta_1 = (K+D)\,k_{S1} + \gamma_g\frac{k_{Sg}}{R_g},\qquad \beta_2 = (K+D)\,k_{S2},
+\beta_1 = (K+D_1)\,k_{S1} + \gamma_g\frac{k_{Sg}}{R_g},\qquad \beta_2 = (K+D_2)\,k_{S2},
 \end{equation}
-and $B_i = \beta_i - D\,k_{Si}$ (bias slightly below $\beta_i$).
+and $B_i = \beta_i - D_i\,k_{Si}$ (bias slightly below $\beta_i$: 2~\% in Area~1, 5~\% in Area~2).
 
 \subsection{Area control errors}
 \begin{equation}
@@ -751,7 +764,7 @@ $\Delta P_{\text{ref},i}(0)=0$; $\gamma_{\text{agc}}=1$ in Cases 2 and 3 (in Cas
 %======================================================================
 \begin{align}
 u_{\text{step}}(t) &= \begin{cases}0,& t<t_{\text{step}}\\1,& t\ge t_{\text{step}}\end{cases}
-\quad(\text{size } \Delta P_{L2} \text{ is inside } \bm Z_n^{\text{post}}),\\
+\quad(\text{size } \Delta P_{L2} \text{ is inside } \bm I_L^{\text{mag,post}}),\\
 f_i\,[\text{Hz}] &= f_0\,\omega_i,\qquad f_{5}\,[\text{Hz}] = f_0\,f_{\text{meas}},\\
 P_{ei}\,[\text{MW}] &= S_{\text{base}}P_{ei},\quad P_g\,[\text{MW}] = S_{\text{base}}P_g,\quad P_{\text{tie}}\,[\text{MW}] = S_{\text{base}}P_{\text{tie}},\\
 P_{mi}\,[\text{MW}] &= S_i\,P_{mi},\qquad Q\,[\text{MVAr}] = S_{\text{base}}\,Q .
@@ -770,7 +783,7 @@ P_{mi}\,[\text{MW}] &= S_i\,P_{mi},\qquad Q\,[\text{MVAr}] = S_{\text{base}}\,Q 
 \node[box] (agc) at (0,4.6) {Secondary control\\(AGC)};
 \node[box] (sg1) at (-4.3,2) {SG1: exciter, field,\\gov, turbine, swing};
 \node[box] (sg2) at (4.3,2) {SG2: exciter, field,\\gov, turbine, swing};
-\node[box,minimum width=4.2cm] (net) at (0,-0.6) {Network\\$\bm V=\bm Z_n[J_1,J_2,J_g]^{\mathsf T}$};
+\node[box,minimum width=4.2cm] (net) at (0,-0.6) {Network\\$\bm V=\bm Z_n[J_1,J_2,J_g]^{\mathsf T}-\bm Z_{nL}\bm I_L$};
 \node[box] (gfm) at (0,-3.4) {GFM\\droop + POD};
 \node[box] (fm) at (5,-3.4) {Bus-5 frequency\\measurement};
 \node[box] (st) at (-5,-2.2) {Load step};
@@ -792,12 +805,12 @@ P_{mi}\,[\text{MW}] &= S_i\,P_{mi},\qquad Q\,[\text{MVAr}] = S_{\text{base}}\,Q 
 \end{center}
 Dashed lines are Goto/From connections; $I_{d1}$, $I_{d2}$, $V_{t1}$, $V_{t2}$ also reach the SG blocks through Goto/From. ($\delta_1,\delta_2$ are also used inside the network for $I_{d1}$, $I_{d2}$ and $\delta_1$ for the unwrapped angle $\theta_5$.)
 
-\subsection{State vector (23 states in Case 3)}
+\subsection{State vector (25 states in Case 3)}
 \begin{align}
 \bm x_{SGi} &= \big[\delta_i,\ \omega_i,\ E'_{qi},\ v_{Ri},\ x_{LLi},\ g_{vi},\ x_{HP,i},\ x_{IP,i},\ x_{LP,i}\big]^{\mathsf T},\qquad i=1,2,\\
-\bm x &= \big[\bm x_{SG1}^{\mathsf T},\ \bm x_{SG2}^{\mathsf T},\ \underbrace{\delta_g,\ z}_{\text{GFM}},\ \underbrace{\hat\theta_5}_{\text{meas.}},\ \underbrace{\Delta P_{\text{ref},1},\ \Delta P_{\text{ref},2}}_{\text{AGC}}\big]^{\mathsf T}.
+\bm x &= \big[\bm x_{SG1}^{\mathsf T},\ \bm x_{SG2}^{\mathsf T},\ \underbrace{\theta_{L,2},\ \theta_{L,3}}_{\text{loads}},\ \underbrace{\delta_g,\ z}_{\text{GFM}},\ \underbrace{\hat\theta_5}_{\text{meas.}},\ \underbrace{\Delta P_{\text{ref},1},\ \Delta P_{\text{ref},2}}_{\text{AGC}}\big]^{\mathsf T}.
 \end{align}
-Case 2 has no GFM and no bus-5 frequency measurement (20 states); Case 1 has in addition no AGC (18 states).
+Case 2 has no GFM and no bus-5 frequency measurement (22 states); Case 1 has in addition no AGC (20 states).
 
 \subsection{Differential--algebraic system}
 Simultaneous solution of the machine differential equations and the algebraic network equations, as in the transient-stability procedure of \cite{KothariNagrath2011}, extended to the multimachine model of \cite{SauerPai1998}.
@@ -805,7 +818,7 @@ Simultaneous solution of the machine differential equations and the algebraic ne
 \begin{align}
 E_{Qi} &= E'_{qi} + (x_q-x'_d)\frac{I_{di}}{k_{Si}}\quad(i=1,2),\label{eq:alg-EQ}\\
 E_1 &= E_{Q1}e^{j\delta_1},\quad E_2 = E_{Q2}e^{j\delta_2},\quad E_g = |E_g|e^{j\delta_g},\\
-\bm V &= \bm Z_n\Big[\tfrac{E_1}{jx_{q1}},\ \tfrac{E_2}{jx_{q2}},\ \tfrac{E_g}{jx_g}\Big]^{\mathsf T},\qquad
+\bm V &= \bm Z_n\Big[\tfrac{E_1}{jx_{q1}},\ \tfrac{E_2}{jx_{q2}},\ \tfrac{E_g}{jx_g}\Big]^{\mathsf T} - \bm Z_{nL}\big[I_L^{\text{mag}}e^{j\theta_{L}}\big]_{2,3},\qquad
 I_g = \frac{E_g - V_5}{jx_g},\\
 I_{t1} &= \tfrac{E_1-V_1}{jx_{q1}},\quad I_{t2} = \tfrac{E_2-V_4}{jx_{q2}},\quad
 I_{di} = \re\{jI_{ti}e^{-j\delta_i}\},\quad V_{t1}=|V_1|,\ V_{t2}=|V_4|,\\
@@ -828,7 +841,7 @@ so \eqref{eq:alg-EQ} is a $2\times 2$ linear system for $E_{Q1},E_{Q2}$ at every
 \paragraph{Differential equations ($i=1,2$):}
 \begin{align}
 \dot\delta_i &= \omega_s(\omega_i-1),\\
-\dot\omega_i &= \frac{1}{2H}\Big[\frac{P_{mi}-P_{ei}/k_{Si}}{\omega_i} - D(\omega_i-1)\Big],\\
+\dot\omega_i &= \frac{1}{2H}\Big[\frac{P_{mi}-P_{ei}/k_{Si}}{\omega_i} - D_i(\omega_i-1)\Big],\\
 \dot E'_{qi} &= \frac{1}{T'_{d0}}\Big[E_{fdi} - E'_{qi} - (x_d-x'_d)\frac{I_{di}}{k_{Si}}\Big],\\
 \dot v_{Ri} &= \frac{1}{T_R}(V_{ti} - v_{Ri}),\qquad
 \dot x_{LLi} = \frac{1}{T_B}(u_{Ei} - x_{LLi}),\\
@@ -917,9 +930,9 @@ which is the classical two-area tie-line relation $\Delta P_{\text{tie}} = \frac
 \subsection{Linearised swing equation}
 With $\omega_i\approx 1$, $1/\omega_i \approx 1-\Delta\omega_i$:
 \begin{equation}
-2H\,s\,\Delta\Omega_i = \Delta P_{mi} - \frac{\Delta P_{ei}}{k_{Si}} - D\Delta\Omega_i
+2H\,s\,\Delta\Omega_i = \Delta P_{mi} - \frac{\Delta P_{ei}}{k_{Si}} - D_i\Delta\Omega_i
 \;\;\Longrightarrow\;\;
-\Delta\Omega_i = \frac{1}{2Hs + D}\Big(\Delta P_{mi}-\frac{\Delta P_{ei}}{k_{Si}}\Big).
+\Delta\Omega_i = \frac{1}{2Hs + D_i}\Big(\Delta P_{mi}-\frac{\Delta P_{ei}}{k_{Si}}\Big).
 \end{equation}
 (The neglected term $-P_{mi}^0\Delta\omega_i$ of $\frac{P_m-P_e}{\omega}$ vanishes because $P_m^0 - P_e^0/k_S = 0$.)
 
@@ -934,7 +947,8 @@ With $\omega_i\approx 1$, $1/\omega_i \approx 1-\Delta\omega_i$:
 \toprule
 Symbol & Value & Symbol & Value\\
 \midrule
-$S_1,\ S_2,\ S_g$ & 1500, 4000, 1500 MVA & $H,\ D$ & 6.3 s, 2\\
+$S_1,\ S_2,\ S_g$ & 1500, 4000, 1500 MVA & $H,\ D$ & 6.3 s, 0\\
+$D_{\text{load}}$ & 1 (load base) & $D_1,\ D_2$ & 0.833, 1.0 (own base)\\
 $x_d,\ x_q$ & 2.135, 2.046 pu (own) & $x'_d,\ T'_{d0}$ & 0.34 pu, 6.47 s\\
 $T_R,\ K_A$ & 0.01 s, 200 & $T_B,\ T_C$ & 10 s, 1 s\\
 $V_{R\max},\ V_{R\min}$ & $999,\ -999$ & $x_g$ & $0.15/k_{Sg}$\\
@@ -945,6 +959,7 @@ $R_g$ & 0.05 & $K_w,\ T_w$ & 3, 1 s\\
 $T_f$ & 0.02 s & $K_i$ & 0.1\\
 $P_{SG1}$ & 1350 MW & $P_{L2},\ P_{L3}$ & 1250, 4000 MW\\
 $\Delta P_{L2}$ & $-100$ MW at $t_{\text{step}}=1$ s & $t_{\text{stop}}$ & 100 s\\
+Loads & ZI (P const.\ current, Q const.\ $Z$) & $T_L$ & 0.1 ms (numerical)\\
 \midrule
 \multicolumn{4}{l}{Resulting operating point (from the load flow and initialisation above):}\\
 $|\bar E_{Q1}|,\ \delta_1^0$ & 2.2296, 1.0923 rad & $|\bar E_{Q2}|,\ \delta_2^0$ & 2.3492, 1.0144 rad\\
